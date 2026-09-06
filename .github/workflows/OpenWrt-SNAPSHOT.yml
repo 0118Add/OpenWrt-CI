@@ -1,4 +1,4 @@
-name: ImmortalWrt x86-18.06
+name: OpenWrt-SNAPSHOT
 
 on:
   repository_dispatch:
@@ -12,21 +12,21 @@ on:
   #  - cron: 0 8 * * 5
 
 env:
-  REPO_URL: https://github.com/0118Add/immortalwrt
-  REPO_BRANCH: openwrt-18.06
-  FEEDS_CONF: x86/diy/x86_lede/18.06.feeds.conf.default
-  CONFIG_FILE: x86/x86-4.19.config
-  DIY_P1_SH: x86/x86-4.19.sh
+  REPO_URL: https://github.com/openwrt/openwrt
+  REPO_BRANCH: main
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: x86/openwrt-snapshot.config
+  DIY_P1_SH: x86/openwrt-snapshot.sh
   DIY_P2_SH: diy-part2.sh
   SSH_ACTIONS: false
   UPLOAD_BIN_DIR: false
   FIRMWARE_RELEASE: true
-  FIRMWARE_TAG: X86_64-18.06
+  FIRMWARE_TAG: OpenWrt-SNAPSHOT
   TZ: Asia/Shanghai
 
 jobs:
   Build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     
     steps:
     - name: Checkout
@@ -48,7 +48,7 @@ jobs:
         sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
         [ -n "$AGENT_TOOLSDIRECTORY" ] && sudo rm -rf "$AGENT_TOOLSDIRECTORY"
         sudo -E apt-get update
-        sudo -E apt-get -y install rename $(cat $GITHUB_WORKSPACE/depends-ubuntu-2204)
+        sudo -E apt-get -y install dos2unix dwarves quilt npm jq rename $(cat $GITHUB_WORKSPACE/depends-ubuntu-2404)
         sudo -E apt-get -y autoremove --purge
         sudo -E apt-get clean
         sudo sed -i '/NVM_DIR/d;/skel/d' /root/{.bashrc,.profile}
@@ -195,7 +195,7 @@ jobs:
         cd $OPENWRT_PATH/bin/targets/*/*
         cat config.buildinfo
         echo "KERNEL=$(cat *.manifest | grep ^kernel | cut -d- -f2 | tr -d ' ')" >> $GITHUB_ENV
-        rm -rf packages feeds.buildinfo version.buildinfo immortalwrt-x86-64-generic-kernel.bin immortalwrt-x86-64-generic-squashfs-combined.img.gz immortalwrt-x86-64-generic-squashfs-rootfs.img.gz immortalwrt-x86-64-generic.manifest profiles.json sha256sums
+        rm -rf packages *.buildinfo *.manifest *kernel.bin *rootfs.img.gz *combined.img.gz *targz-combined-efi.img.gz *targz-rootfs.tar.gz profiles.json sha256sums
         echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
         echo "status=success" >> ${GITHUB_OUTPUT}    
     
