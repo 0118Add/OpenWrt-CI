@@ -100,7 +100,7 @@ git clone https://github.com/sbwml/feeds_packages_net_curl feeds/packages/net/cu
 # 音乐解锁
 sed -i 's/解除网易云音乐播放限制/音乐解锁/g' feeds/luci/applications/luci-app-unblockneteasemusic/root/usr/share/luci/menu.d/luci-app-unblockneteasemusic.json
 
-# 调整Dockerman到服务菜单
+# Dockerman
 rm -rf feeds/luci/applications/luci-app-dockerman
 git clone https://github.com/sbwml/luci-app-dockerman feeds/luci/applications/luci-app-dockerman
 #rm -rf feeds/packages/utils/{docker,dockerd,containerd,runc}
@@ -109,6 +109,12 @@ git clone https://github.com/sbwml/luci-app-dockerman feeds/luci/applications/lu
 #git clone https://github.com/sbwml/packages_utils_containerd feeds/packages/utils/containerd
 #git clone https://github.com/sbwml/packages_utils_runc feeds/packages/utils/runc
 sed -i 's/"admin/"admin\/services/g' feeds/luci/applications/luci-app-dockerman/root/usr/share/luci/menu.d/luci-app-dockerman.json
+
+# ttyd
+#sed -i 's/services/system/g' feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json
+sed -i '3 a\\t\t"order": 50,' feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json
+sed -i 's/procd_set_param stdout 1/procd_set_param stdout 0/g' feeds/packages/utils/ttyd/files/ttyd.init
+sed -i 's/procd_set_param stderr 1/procd_set_param stderr 0/g' feeds/packages/utils/ttyd/files/ttyd.init
 
 # 自定义配置,替换文件
 #sed -i '/exit 0$/d' package/emortal/default-settings/files/99-default-settings
