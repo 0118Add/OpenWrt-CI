@@ -39,10 +39,9 @@ sed -i 's/net.netfilter.nf_conntrack_max=.*/net.netfilter.nf_conntrack_max=65535
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
 
 # autocore default-settings
-#rm -rf package/emortal/autocore
+rm -rf package/emortal/autocore
 #rm -rf package/emortal/default-settings
-#merge_package main https://github.com/0118Add/Openwrt-CI package/Openwrt-CI autocore
-#git clone --depth=1 -b openwrt-25.12 https://github.com/sbwml/autocore-arm package/autocore
+git clone --depth=1 -b openwrt-25.12 https://github.com/sbwml/autocore-arm package/autocore
 #git clone https://github.com/sbwml/default-settings package/default-settings
 
 # passwall核心库
@@ -83,20 +82,20 @@ git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 sed -i 's/vpn/services/g' feeds/luci/applications/luci-app-zerotier/root/usr/share/luci/menu.d/luci-app-zerotier.json
 
 # golang 27.x
-#rm -rf feeds/packages/lang/golang
-#git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 27.x feeds/packages/lang/golang
+rm -rf feeds/packages/lang/golang
+git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 27.x feeds/packages/lang/golang
 
 # 预编译 node
 #rm -rf feeds/packages/lang/node/node
 #git clone --depth=1 -b packages-25.12 https://github.com/sbwml/feeds_packages_lang_node-prebuilt feeds/packages/lang/node/node
 
 # luci-app-filemanager
-#rm -rf feeds/luci/applications/luci-app-filemanager
-#git clone https://github.com/sbwml/luci-app-filemanager package/luci-app-filemanager
+rm -rf feeds/luci/applications/luci-app-filemanager
+git clone https://github.com/sbwml/luci-app-filemanager package/luci-app-filemanager
 
 # curl
-#rm -rf feeds/packages/net/curl
-#git clone https://github.com/sbwml/feeds_packages_net_curl feeds/packages/net/curl
+rm -rf feeds/packages/net/curl
+git clone https://github.com/sbwml/feeds_packages_net_curl feeds/packages/net/curl
 
 # 音乐解锁
 sed -i 's/解除网易云音乐播放限制/音乐解锁/g' feeds/luci/applications/luci-app-unblockneteasemusic/root/usr/share/luci/menu.d/luci-app-unblockneteasemusic.json
