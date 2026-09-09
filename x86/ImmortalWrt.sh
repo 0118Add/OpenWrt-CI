@@ -16,8 +16,12 @@ echo "========================="
 chmod +x ${GITHUB_WORKSPACE}/immortalwrt/function.sh
 source ${GITHUB_WORKSPACE}/immortalwrt/function.sh
 
+mirror="https://raw.githubusercontent.com/sbwml/r4s_build_script/refs/heads/master"
+github="github.com"
+gitea="git.cooluc.com"
+
 # 更改主机名
-sed -i "s/hostname='.*'/hostname='OpenWrt'/g" package/base-files/files/bin/config_generate
+#sed -i "s/hostname='.*'/hostname='OpenWrt'/g" package/base-files/files/bin/config_generate
 
 # 更改固件版本信息
 #sed -i "s|DISTRIB_REVISION='.*'|DISTRIB_REVISION=''|g" package/base-files/files/etc/openwrt_release
@@ -34,157 +38,112 @@ sed -i 's/net.netfilter.nf_conntrack_max=.*/net.netfilter.nf_conntrack_max=65535
 # 修正连接数
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
 
-# 修复上移下移按钮翻译
-sed -i 's/<%:Up%>/<%:Move up%>/g' feeds/luci/modules/luci-compat/luasrc/view/cbi/tblsection.htm
-sed -i 's/<%:Down%>/<%:Move down%>/g' feeds/luci/modules/luci-compat/luasrc/view/cbi/tblsection.htm
+# autocore default-settings
+#rm -rf package/emortal/autocore
+#rm -rf package/emortal/default-settings
+#git clone --depth=1 -b openwrt-25.12 https://github.com/sbwml/autocore-arm package/autocore
+#git clone https://github.com/sbwml/default-settings package/default-settings
 
-# 修复procps-ng-top导致首页cpu使用率无法获取
-sed -i 's#top -n1#\/bin\/busybox top -n1#g' feeds/luci/modules/luci-base/root/usr/share/rpcd/ucode/luci
-
-# ------------------PassWall 科学上网--------------------------
-# 移除 openwrt feeds 自带的核心库
-rm -rf feeds/packages/net/{xray-core,v2ray-core,v2ray-geodata,pdnsd-alt,chinadns-ng,dns2socks,dns2tcp,gn,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan,trojan-go,trojan-plus,tuic-client,v2ray-plugin,xray-plugin}
-# 核心库
-git clone https://github.com/xiaorouji/openwrt-passwall-packages package/passwall-packages
-rm -rf package/passwall-packages/{chinadns-ng,naiveproxy,v2ray-geodata,sing-box}
-merge_package v5 https://github.com/sbwml/openwrt_helloworld package/passwall-packages chinadns-ng naiveproxy v2ray-geodata
-# app
-#rm -rf feeds/luci/applications/{luci-app-passwall,luci-app-ssr-libev-server}
-#git clone -b luci-smartdns-dev --single-branch https://github.com/lwb1978/openwrt-passwall package/passwall-luci
-# git clone https://github.com/xiaorouji/openwrt-passwall package/passwall-luci
-# ------------------------------------------------------------
-
-# SmartDNS
-#rm -rf feeds/luci/applications/luci-app-smartdns
-#git clone https://github.com/lwb1978/luci-app-smartdns package/luci-app-smartdns
-# 替换immortalwrt 软件仓库smartdns版本为官方最新版
-#rm -rf feeds/packages/net/smartdns
-# cp -rf ${GITHUB_WORKSPACE}/patch/smartdns package/
-#git clone https://github.com/lwb1978/openwrt-smartdns package/smartdns
-# 添加 smartdns-ui
-#echo "CONFIG_PACKAGE_luci-app-smartdns_INCLUDE_smartdns_ui=y" >> .config
-#echo "CONFIG_PACKAGE_smartdns-ui=y" >> .config
+# passwall核心库
+rm -rf feeds/luci/applications/{luci-app-daed,luci-app-openclash}
+rm -rf feeds/packages/net/{daed,v2ray-geodata,xray-core}
+#git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
+merge_package main https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/openwrt-passwall-packages v2ray-geodata xray-core
 
 # openclash
-rm -rf feeds/luci/applications/luci-app-openclash
 git clone --depth=1 -b dev https://github.com/vernesong/OpenClash package/OpenClash
 
 # homeproxy
-rm -rf feeds/luci/applications/luci-app-homeproxy
-git clone --depth=1 -b dev https://github.com/immortalwrt/homeproxy package/luci-app-homeproxy
-sed -i "s/ImmortalWrt/OpenWrt/g" package/luci-app-homeproxy/po/zh_Hans/homeproxy.po
-sed -i "s/ImmortalWrt proxy/OpenWrt proxy/g" package/luci-app-homeproxy/htdocs/luci-static/resources/view/homeproxy/{client.js,server.js}
+#git clone --depth=1 -b dev https://github.com/immortalwrt/homeproxy package/luci-app-homeproxy
+sed -i "s/ImmortalWrt/OpenWrt/g" feeds/luci/applications/luci-app-homeproxy/po/zh_Hans/homeproxy.po
+sed -i "s/ImmortalWrt proxy/OpenWrt proxy/g" feeds/luci/applications/luci-app-homeproxy/htdocs/luci-static/resources/view/homeproxy/{client.js,server.js}
 
-# mihomo
-git clone https://github.com/nikkinikki-org/OpenWrt-nikki  package/OpenWrt-nikki
+# clashoo
+git clone https://github.com/kenzok8/openwrt-clashoo package/clashoo
 
-# neko
-#git clone -b nekobox --depth 1 https://github.com/Thaolga/openwrt-nekobox package/nekobox
+# mihomo momo
+#git clone https://github.com/nikkinikki-org/OpenWrt-nikki  package/OpenWrt-nikki
+#git clone -b main --depth 1 https://github.com/nikkinikki-org/OpenWrt-momo package/OpenWrt-momo
+
+# dae daed
+git clone --depth=1 -b kix https://github.com/QiuSimons/luci-app-daed package/daed
+git clone https://github.com/QiuSimons/vmlinux-btf package/vmlinux-btf
+sed -i 's/PKG_VERSION:=.*/PKG_VERSION:=2026.06.14/g' package/daed/daed/Makefile
+sed -i 's/DAED_VERSION:=.*/DAED_VERSION:=daed-4d6a433/g' package/daed/daed/Makefile
+sed -i 's/WING_VERSION:=.*/WING_VERSION:=wing-dc50308/g' package/daed/daed/Makefile
+sed -i 's/CORE_VERSION:=.*/CORE_VERSION:=core-5a51cc7/g' package/daed/daed/Makefile
+sed -i 's/PKG_SOURCE_VERSION:=.*/PKG_SOURCE_VERSION:=4d6a43331f2f6e25961935b9e7ac09a7568bb2b4/g' package/daed/daed/Makefile
 
 # partexp
 git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 
 # tailscale zerotier
 #git clone https://github.com/Jaykwok2999/luci-app-tailscale  package/luci-app-tailscale
-sed -i 's/vpn/services/g' feeds/luci/applications/luci-app-zerotier/root/usr/share/luci/menu.d/luci-app-zerotier.json
+#sed -i 's/vpn/services/g' feeds/luci/applications/luci-app-zerotier/root/usr/share/luci/menu.d/luci-app-zerotier.json
 
-# golang 1.25
-rm -rf feeds/packages/lang/golang
-git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 25.x feeds/packages/lang/golang
+# golang 27.x
+#rm -rf feeds/packages/lang/golang
+#git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 27.x feeds/packages/lang/golang
+
+# 预编译 node
+#rm -rf feeds/packages/lang/node/node
+#git clone --depth=1 -b packages-25.12 https://github.com/sbwml/feeds_packages_lang_node-prebuilt feeds/packages/lang/node/node
 
 # luci-app-filemanager
-rm -rf feeds/luci/applications/luci-app-filemanager
-git clone https://github.com/sbwml/luci-app-filemanager package/luci-app-filemanager
+#rm -rf feeds/luci/applications/luci-app-filemanager
+#git clone https://github.com/sbwml/luci-app-filemanager package/luci-app-filemanager
 
 # curl
-rm -rf feeds/packages/net/curl
-git clone https://github.com/sbwml/feeds_packages_net_curl feeds/packages/net/curl
+#rm -rf feeds/packages/net/curl
+#git clone https://github.com/sbwml/feeds_packages_net_curl feeds/packages/net/curl
 
-# apk-tools APK管理器不再校验版本号的合法性
-mkdir -p package/system/apk/patches && cp -f ${GITHUB_WORKSPACE}/patch/apk-tools/9999-hack-for-linux-pre-releases.patch package/system/apk/patches/
+# 音乐解锁
+sed -i 's/解除网易云音乐播放限制/音乐解锁/g' feeds/luci/applications/luci-app-unblockneteasemusic/root/usr/share/luci/menu.d/luci-app-unblockneteasemusic.json
 
-mirror=raw.githubusercontent.com/sbwml/r4s_build_script/master
+# Dockerman
+rm -rf feeds/luci/applications/luci-app-dockerman
+git clone https://github.com/sbwml/luci-app-dockerman feeds/luci/applications/luci-app-dockerman
+#rm -rf feeds/packages/utils/{docker,dockerd,containerd,runc}
+#git clone https://github.com/sbwml/packages_utils_docker feeds/packages/utils/docker
+#git clone https://github.com/sbwml/packages_utils_dockerd feeds/packages/utils/dockerd
+#git clone https://github.com/sbwml/packages_utils_containerd feeds/packages/utils/containerd
+#git clone https://github.com/sbwml/packages_utils_runc feeds/packages/utils/runc
+sed -i 's/"admin/"admin\/services/g' feeds/luci/applications/luci-app-dockerman/root/usr/share/luci/menu.d/luci-app-dockerman.json
 
-# 防火墙4添加自定义nft命令支持
-# curl -s https://$mirror/openwrt/patch/firewall4/100-openwrt-firewall4-add-custom-nft-command-support.patch | patch -p1
-patch -p1 < ${GITHUB_WORKSPACE}/patch/firewall4/100-openwrt-firewall4-add-custom-nft-command-support.patch
+# ttyd
+#sed -i 's/services/system/g' feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json
+sed -i '3 a\\t\t"order": 50,' feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json
+sed -i 's/procd_set_param stdout 1/procd_set_param stdout 0/g' feeds/packages/utils/ttyd/files/ttyd.init
+sed -i 's/procd_set_param stderr 1/procd_set_param stderr 0/g' feeds/packages/utils/ttyd/files/ttyd.init
 
-pushd feeds/luci
-	# 防火墙4添加自定义nft命令选项卡
-	# curl -s https://$mirror/openwrt/patch/firewall4/luci-24.10/0004-luci-add-firewall-add-custom-nft-rule-support.patch | patch -p1
-	patch -p1 < ${GITHUB_WORKSPACE}/patch/firewall4/0004-luci-add-firewall-add-custom-nft-rule-support.patch
-	# 状态-防火墙页面去掉iptables警告，并添加nftables、iptables标签页
-	# curl -s https://$mirror/openwrt/patch/luci/0004-luci-mod-status-firewall-disable-legacy-firewall-rul.patch | patch -p1
-	patch -p1 < ${GITHUB_WORKSPACE}/patch/firewall4/0004-luci-mod-status-firewall-disable-legacy-firewall-rul.patch
-popd
-
-# 补充 firewall4 luci 中文翻译
-cat >> "feeds/luci/applications/luci-app-firewall/po/zh_Hans/firewall.po" <<-EOF
-	
-	msgid ""
-	"Custom rules allow you to execute arbitrary nft commands which are not "
-	"otherwise covered by the firewall framework. The rules are executed after "
-	"each firewall restart, right after the default ruleset has been loaded."
-	msgstr ""
-	"自定义规则允许您执行不属于防火墙框架的任意 nft 命令。每次重启防火墙时，"
-	"这些规则在默认的规则运行后立即执行。"
-	
-	msgid ""
-	"Applicable to internet environments where the router is not assigned an IPv6 prefix, "
-	"such as when using an upstream optical modem for dial-up."
-	msgstr ""
-	"适用于路由器未分配 IPv6 前缀的互联网环境，例如上游使用光猫拨号时。"
-
-	msgid "NFtables Firewall"
-	msgstr "NFtables 防火墙"
-
-	msgid "IPtables Firewall"
-	msgstr "IPtables 防火墙"
-EOF
-
-# vim - fix E1187: Failed to source defaults.vim
-pushd feeds/packages
-	vim_ver=$(cat utils/vim/Makefile | grep -i "PKG_VERSION:=" | awk 'BEGIN{FS="="};{print $2}' | awk 'BEGIN{FS=".";OFS="."};{print $1,$2}')
-	[ "$vim_ver" = "9.0" ] && {
-		echo "修复 vim E1187 的错误"
-		# curl -s https://github.com/openwrt/packages/commit/699d3fbee266b676e21b7ed310471c0ed74012c9.patch | patch -p1
-		patch -p1 < ${GITHUB_WORKSPACE}/patch/vim/0001-vim-fix-renamed-defaults-config-file.patch
-	}
-popd
-
-# 调整Dockerman到服务菜单
-sed -i 's/"admin",/"admin","services",/g' feeds/luci/applications/luci-app-dockerman/luasrc/controller/*.lua
-sed -i 's/"admin/"admin\/services/g' feeds/luci/applications/luci-app-dockerman/luasrc/model/*.lua
-sed -i 's/"admin/"admin\/services/g' feeds/luci/applications/luci-app-dockerman/luasrc/model/cbi/dockerman/*.lua
-sed -i 's/"admin/"admin\/services/g' feeds/luci/applications/luci-app-dockerman/luasrc/view/dockerman/*.htm
-sed -i 's/"admin/"admin\/services/g' feeds/luci/applications/luci-app-dockerman/luasrc/view/dockerman/cbi/*.htm
-
-# 修正部分从第三方仓库拉取的软件 Makefile 路径问题
-find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' {}
-find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/lang\/golang\/golang-package.mk/$(TOPDIR)\/feeds\/packages\/lang\/golang\/golang-package.mk/g' {}
-find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/lang\/rust\/rust-package.mk/$(TOPDIR)\/feeds\/packages\/lang\/rust\/rust-package.mk/g' {}
-find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/PKG_SOURCE_URL:=@GHREPO/PKG_SOURCE_URL:=https:\/\/github.com/g' {}
-find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/PKG_SOURCE_URL:=@GHCODELOAD/PKG_SOURCE_URL:=https:\/\/codeload.github.com/g' {}
-
-# 自定义默认配置
-sed -i '/exit 0$/d' package/emortal/default-settings/files/99-default-settings
-cat ${GITHUB_WORKSPACE}/immortalwrt/default-settings >> package/emortal/default-settings/files/99-default-settings
-curl -fsSL https://raw.githubusercontent.com/0118Add/Openwrt-CI/main/immortalwrt/10_system.js > ./feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
-curl -fsSL https://raw.githubusercontent.com/0118Add/X86-N1-Actions/main/general/25_storage.js > ./feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/25_storage.js
+# 自定义配置,替换文件
+#sed -i '/exit 0$/d' package/emortal/default-settings/files/99-default-settings
+#cat ${GITHUB_WORKSPACE}/immortalwrt/default-settings >> package/emortal/default-settings/files/99-default-settings
+#curl -fsSL https://raw.githubusercontent.com/0118Add/Openwrt-CI/main/patch/25.12/10_system.js > ./feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
+#curl -fsSL https://raw.githubusercontent.com/0118Add/Openwrt-CI/main/lede/10_system.js > ./feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
+curl -fsSL https://raw.githubusercontent.com/0118Add/X86-Actions/main/general/25_storage.js > ./feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/25_storage.js
 #curl -fsSL https://raw.githubusercontent.com/0118Add/Openwrt-CI/main/immortalwrt/29_ports.js > ./feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/29_ports.js
+#curl -fsSL https://raw.githubusercontent.com/0118Add/build-openwrt/master/scripts/30_network.js > ./feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/30_network.js
+#wget -O package/autocore/files/generic/10_system.js https://raw.githubusercontent.com/0118Add/Openwrt-CI/main/patch/25.12/10_system.js
+#wget -O package/autocore/files/generic/29_ports.js https://raw.githubusercontent.com/0118Add/Openwrt-CI/main/x86/diy/x86_lede/29_ports.js
 
 # comment out the following line to restore the full description
-sed -i '/# timezone/i grep -q '\''/tmp/sysinfo/model'\'' /etc/rc.local || sudo sed -i '\''/exit 0/i [ "$(cat /sys\\/class\\/dmi\\/id\\/sys_vendor 2>\\/dev\\/null)" = "Default string" ] \&\& echo "x86_64" > \\/tmp\\/sysinfo\\/model'\'' /etc/rc.local\n' package/emortal/default-settings/files/99-default-settings
-sed -i '/# timezone/i sed -i "s/\\(DISTRIB_DESCRIPTION=\\).*/\\1'\''ImmortalWrt $(sed -n "s/DISTRIB_DESCRIPTION='\''ImmortalWrt \\([^ ]*\\) .*/\\1/p" /etc/openwrt_release)'\'',/" /etc/openwrt_release\nsource /etc/openwrt_release \&\& sed -i -e "s/distversion\\s=\\s\\".*\\"/distversion = \\"$DISTRIB_ID $DISTRIB_RELEASE ($DISTRIB_REVISION)\\"/g" -e '\''s/distname    = .*$/distname    = ""/g'\'' /usr/lib/lua/luci/version.lua\nsed -i "s/luciname    = \\".*\\"/luciname    = \\"LuCI Master\\"/g" /usr/lib/lua/luci/version.lua\nsed -i "s/luciversion = \\".*\\"/luciversion = \\"\\"/g" /usr/lib/lua/luci/version.lua\necho "export const revision = '\''\'\'', branch = '\''LuCI Master'\'';" > /usr/share/ucode/luci/version.uc\n/etc/init.d/rpcd restart\n' package/emortal/default-settings/files/99-default-settings
+#sed -i '/# timezone/i grep -q '\''/tmp/sysinfo/model'\'' /etc/rc.local || sudo sed -i '\''/exit 0/i [ "$(cat /sys\\/class\\/dmi\\/id\\/sys_vendor 2>\\/dev\\/null)" = "Default string" ] \&\& echo "x86_64" > \\/tmp\\/sysinfo\\/model'\'' /etc/rc.local\n' package/emortal/default-settings/files/99-default-settings
+#sed -i '/# timezone/i sed -i "s/\\(DISTRIB_DESCRIPTION=\\).*/\\1'\''ImmortalWrt $(sed -n "s/DISTRIB_DESCRIPTION='\''ImmortalWrt \\([^ ]*\\) .*/\\1/p" /etc/openwrt_release)'\'',/" /etc/openwrt_release\nsource /etc/openwrt_release \&\& sed -i -e "s/distversion\\s=\\s\\".*\\"/distversion = \\"$DISTRIB_ID $DISTRIB_RELEASE ($DISTRIB_REVISION)\\"/g" -e '\''s/distname    = .*$/distname    = ""/g'\'' /usr/lib/lua/luci/version.lua\nsed -i "s/luciname    = \\".*\\"/luciname    = \\"LuCI Master\\"/g" /usr/lib/lua/luci/version.lua\nsed -i "s/luciversion = \\".*\\"/luciversion = \\"\\"/g" /usr/lib/lua/luci/version.lua\necho "export const revision = '\''\'\'', branch = '\''LuCI Master'\'';" > /usr/share/ucode/luci/version.uc\n/etc/init.d/rpcd restart\n' package/emortal/default-settings/files/99-default-settings
 #sed -i '/# timezone/i sed -i "s/\\(DISTRIB_DESCRIPTION=\\).*/\\1'\''ImmortalWrt $(sed -n "s/DISTRIB_DESCRIPTION='\''ImmortalWrt \\([^ ]*\\) .*/\\1/p" /etc/openwrt_release)'\'',/" /etc/openwrt_release\nsource /etc/openwrt_release \&\& sed -i -e "s/distversion\\s=\\s\\".*\\"/distversion = \\"$DISTRIB_ID $DISTRIB_RELEASE ($DISTRIB_REVISION)\\"/g" -e '\''s/distname    = .*$/distname    = ""/g'\'' /usr/lib/lua/luci/version.lua\nsed -i "s/luciname    = \\".*\\"/luciname    = \\"LuCI Master\\"/g" /usr/lib/lua/luci/version.lua\nsed -i "s/luciversion = \\".*\\"/luciversion = \\"v'$(date +%Y%m%d)'\\"/g" /usr/lib/lua/luci/version.lua\necho "export const revision = '\''v'$(date +%Y%m%d)'\'\'', branch = '\''LuCI Master'\'';" > /usr/share/ucode/luci/version.uc\n/etc/init.d/rpcd restart\n' package/emortal/default-settings/files/99-default-settings
-curl -fsSL https://raw.githubusercontent.com/0118Add/Openwrt-CI/main/immortalwrt/release-os > package/base-files/files/etc/os-release
+#curl -fsSL https://raw.githubusercontent.com/0118Add/Openwrt-CI/main/patch/25.12/os-release > package/base-files/files/etc/os-release
 
-sed -i 's/--set=llvm\.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/' feeds/packages/lang/rust/Makefile
+# 移除luci-app-attendedsysupgrade
+sed -i "/attendedsysupgrade/d" $(find ./feeds/luci/collections/ -type f -name "Makefile")
 
-# 拷贝自定义文件
-if [ -n "$(ls -A "${GITHUB_WORKSPACE}/immortalwrt/diy" 2>/dev/null)" ]; then
-	cp -Rf ${GITHUB_WORKSPACE}/immortalwrt/diy/* .
-fi
+# 移除luci-app-attendedsysupgrade
+#sed -i '18d' feeds/luci/collections/luci-nginx/Makefile
+#sed -i '17d' feeds/luci/collections/luci/Makefile
+#sed -i '16s/ \\$//' feeds/luci/collections/luci/Makefile
+
+rm -rf package/emortal/automount
+rm -rf feeds/luci/applications/luci-app-mjpg-streamer
+rm -rf feeds/packages/net/onionshare-cli
 
 ./scripts/feeds update -a
 ./scripts/feeds install -a
