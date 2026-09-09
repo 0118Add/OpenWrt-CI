@@ -141,6 +141,7 @@ sed -i "/attendedsysupgrade/d" $(find ./feeds/luci/collections/ -type f -name "M
 #sed -i '17d' feeds/luci/collections/luci/Makefile
 #sed -i '16s/ \\$//' feeds/luci/collections/luci/Makefile
 
+rm -rf package/emortal/automount
 rm -rf feeds/luci/applications/luci-app-mjpg-streamer
 rm -rf feeds/packages/net/onionshare-cli
 
