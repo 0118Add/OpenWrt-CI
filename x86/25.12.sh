@@ -79,11 +79,11 @@ git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 
 # tailscale zerotier
 #git clone https://github.com/Jaykwok2999/luci-app-tailscale  package/luci-app-tailscale
-sed -i 's/vpn/services/g' feeds/luci/applications/luci-app-zerotier/root/usr/share/luci/menu.d/luci-app-zerotier.json
+#sed -i 's/vpn/services/g' feeds/luci/applications/luci-app-zerotier/root/usr/share/luci/menu.d/luci-app-zerotier.json
 
 # golang 27.x
-rm -rf feeds/packages/lang/golang
-git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 27.x feeds/packages/lang/golang
+#rm -rf feeds/packages/lang/golang
+#git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 27.x feeds/packages/lang/golang
 
 # 预编译 node
 #rm -rf feeds/packages/lang/node/node
