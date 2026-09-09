@@ -15,7 +15,7 @@ env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: v25.12.2
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: x86/25.12.config
+  CONFIG_FILE: x86/ImmortalWrt.config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: x86/25.12.sh
   SSH_ACTIONS: false
