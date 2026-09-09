@@ -31,7 +31,7 @@ gitea="git.cooluc.com"
 #sed -i 's/KERNEL_PATCHVER:=.*/KERNEL_PATCHVER:=6.12/g' ./target/linux/x86/Makefile
 
 # 修改默认IP
-#sed -i 's/192.168.1.1/10.0.0.1/g' package/base-files/files/bin/config_generate
+sed -i 's/192.168.1.1/10.0.0.1/g' package/base-files/files/bin/config_generate
 
 # 修改连接数
 sed -i 's/net.netfilter.nf_conntrack_max=.*/net.netfilter.nf_conntrack_max=65535/g' package/kernel/linux/files/sysctl-nf-conntrack.conf
@@ -39,9 +39,9 @@ sed -i 's/net.netfilter.nf_conntrack_max=.*/net.netfilter.nf_conntrack_max=65535
 sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' package/base-files/files/etc/sysctl.conf
 
 # autocore default-settings
-#rm -rf package/emortal/autocore
+rm -rf package/emortal/autocore
 #rm -rf package/emortal/default-settings
-#git clone --depth=1 -b openwrt-25.12 https://github.com/sbwml/autocore-arm package/autocore
+git clone --depth=1 -b openwrt-25.12 https://github.com/sbwml/autocore-arm package/autocore
 #git clone https://github.com/sbwml/default-settings package/default-settings
 
 # passwall核心库
