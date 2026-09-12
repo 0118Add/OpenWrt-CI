@@ -258,6 +258,12 @@ sed -i 's/解除网易云音乐播放限制/音乐解锁/g' feeds/luci/applicati
 # rust版本以免编译失败
 #sed -i 's/--set=llvm\.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/' feeds/packages/lang/rust/Makefile
 
+# ttyd
+sed -i 's/services/system/g' feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json
+sed -i '3 a\\t\t"order": 50,' feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json
+sed -i 's/procd_set_param stdout 1/procd_set_param stdout 0/g' feeds/packages/utils/ttyd/files/ttyd.init
+sed -i 's/procd_set_param stderr 1/procd_set_param stderr 0/g' feeds/packages/utils/ttyd/files/ttyd.init
+
 # 调整 Dockerman 到 服务 菜单
 sed -i 's/"admin",/"admin","services",/g' feeds/lienol/other/luci-app-dockerman/luasrc/controller/*.lua
 sed -i 's/"admin/"admin\/services/g' feeds/lienol/other/luci-app-dockerman/luasrc/model/*.lua
