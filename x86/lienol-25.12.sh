@@ -91,9 +91,9 @@ git clone --depth=1 -b openwrt-25.12 https://github.com/sbwml/autocore-arm packa
 rm -rf package/default-settings
 git clone https://github.com/sbwml/default-settings package/default-settings
 
-# golang 1.26
+# golang 27.x
 rm -rf feeds/packages/lang/golang
-git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/lang/golang
+git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 27.x feeds/packages/lang/golang
 
 # 预编译 node
 rm -rf feeds/packages/lang/node
@@ -157,17 +157,18 @@ git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 #rm -rf feeds/packages/net/smartdns
 #cp -rf ${GITHUB_WORKSPACE}/general/smartdns feeds/packages/net
 
+# clashoo
+git clone https://github.com/kenzok8/openwrt-clashoo package/clashoo
+
 # homeproxy
-#git clone --depth 1 -b dev https://github.com/immortalwrt/homeproxy package/luci-app-homeproxy
-git clone --depth 1 -b master https://github.com/fun200/homeproxy_plus package/luci-app-homeproxy
+git clone -b master --depth 1 https://github.com/szwjp/homeproxy package/luci-app-homeproxy
+#git clone --depth 1 -b master https://github.com/fun200/homeproxy_plus package/luci-app-homeproxy
 sed -i "s/ImmortalWrt/OpenWrt/g" package/luci-app-homeproxy/po/zh_Hans/homeproxy.po
 sed -i "s/ImmortalWrt proxy/OpenWrt proxy/g" package/luci-app-homeproxy/htdocs/luci-static/resources/view/homeproxy/{client.js,server.js}
 
 # mihomo
 #git clone https://github.com/nikkinikki-org/OpenWrt-momo package/OpenWrt-momo
 #git clone https://github.com/nikkinikki-org/OpenWrt-nikki  package/OpenWrt-nikki
-#sed -i 's/MihomoTProxy/Mihomo/g' package/openwrt-mihomo/luci-app-mihomo/po/zh_Hans/mihomo.po
-#sed -i 's/MihomoTProxy/Mihomo/g' package/openwrt-mihomo/luci-app-mihomo/root/usr/share/luci/menu.d/luci-app-mihomo.json
 
 # dae daed
 #git clone https://github.com/kenzok8/openwrt-daede package/daede
@@ -215,7 +216,6 @@ ln -sf ../../../feeds/packages/net/msd_lite ./package/feeds/packages/msd_lite
 #ln -sf ../../../feeds/packages/net/zerotier ./package/feeds/packages/zerotier
 #sed -i "s/ImmortalWrt/OpenWrt/g" feeds/luci/applications/luci-app-homeproxy/po/zh_Hans/homeproxy.po
 #sed -i "s/ImmortalWrt proxy/OpenWrt proxy/g" feeds/luci/applications/luci-app-homeproxy/htdocs/luci-static/resources/view/homeproxy/{client.js,server.js}
-#wget -O feeds/luci/applications/luci-app-homeproxy/root/etc/init.d/homeproxy https://raw.githubusercontent.com/0118Add/X86-Actions/main/general/homeproxy
 
 # Dockerman
 #git clone https://github.com/sbwml/luci-app-dockerman package/luci-app-dockerman
@@ -324,7 +324,7 @@ curl -fsSL https://raw.githubusercontent.com/0118Add/X86-Actions/main/general/25
 #curl -fsSL https://raw.githubusercontent.com/0118Add/Openwrt-CI/main/immortalwrt/29_ports.js > ./feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/29_ports.js
 
 # comment out the following line to restore the full description
-sed -i '/# timezone/i grep -q '\''/tmp/sysinfo/model'\'' /etc/rc.local || sudo sed -i '\''/exit 0/i [ "$(cat /sys\\/class\\/dmi\\/id\\/sys_vendor 2>\\/dev\\/null)" = "Default string" ] \&\& echo "x86_64" > \\/tmp\\/sysinfo\\/model'\'' /etc/rc.local\n' package/default-settings/default/zzz-default-settings
+#sed -i '/# timezone/i grep -q '\''/tmp/sysinfo/model'\'' /etc/rc.local || sudo sed -i '\''/exit 0/i [ "$(cat /sys\\/class\\/dmi\\/id\\/sys_vendor 2>\\/dev\\/null)" = "Default string" ] \&\& echo "x86_64" > \\/tmp\\/sysinfo\\/model'\'' /etc/rc.local\n' package/default-settings/default/zzz-default-settings
 sed -i '/# timezone/i sed -i "s/\\(DISTRIB_DESCRIPTION=\\).*/\\1'\''OpenWrt $(sed -n "s/DISTRIB_DESCRIPTION='\''OpenWrt \\([^ ]*\\) .*/\\1/p" /etc/openwrt_release)'\'',/" /etc/openwrt_release\nsource /etc/openwrt_release \&\& sed -i -e "s/distversion\\s=\\s\\".*\\"/distversion = \\"$DISTRIB_ID $DISTRIB_RELEASE ($DISTRIB_REVISION)\\"/g" -e '\''s/distname    = .*$/distname    = ""/g'\'' /usr/lib/lua/luci/version.lua\nsed -i "s/luciname    = \\".*\\"/luciname    = \\"LuCI openwrt-25.12\\"/g" /usr/lib/lua/luci/version.lua\nsed -i "s/luciversion = \\".*\\"/luciversion = \\"\\"/g" /usr/lib/lua/luci/version.lua\necho "export const revision = '\''\'\'', branch = '\''LuCI openwrt-25.12'\'';" > /usr/share/ucode/luci/version.uc\n/etc/init.d/rpcd restart\n' package/default-settings/default/zzz-default-settings
 #sed -i '/# timezone/i sed -i "s/\\(DISTRIB_DESCRIPTION=\\).*/\\1'\''OpenWrt $(sed -n "s/DISTRIB_DESCRIPTION='\''OpenWrt \\([^ ]*\\) .*/\\1/p" /etc/openwrt_release)'\'',/" /etc/openwrt_release\nsource /etc/openwrt_release \&\& sed -i -e "s/distversion\\s=\\s\\".*\\"/distversion = \\"$DISTRIB_ID $DISTRIB_RELEASE ($DISTRIB_REVISION)\\"/g" -e '\''s/distname    = .*$/distname    = ""/g'\'' /usr/lib/lua/luci/version.lua\nsed -i "s/luciname    = \\".*\\"/luciname    = \\"LuCI openwrt-25.12\\"/g" /usr/lib/lua/luci/version.lua\nsed -i "s/luciversion = \\".*\\"/luciversion = \\"v'$(date +%Y%m%d)'\\"/g" /usr/lib/lua/luci/version.lua\necho "export const revision = '\''v'$(date +%Y%m%d)'\'\'', branch = '\''LuCI openwrt-25.12'\'';" > /usr/share/ucode/luci/version.uc\n/etc/init.d/rpcd restart\n' package/default-settings/default/zzz-default-settings
 curl -fsSL https://raw.githubusercontent.com/0118Add/X86-N1-Actions/main/scripts/release-os > package/base-files/files/etc/os-release
