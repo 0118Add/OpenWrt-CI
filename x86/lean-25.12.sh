@@ -44,7 +44,7 @@ sed -i "s/hostname='.*'/hostname='OpenWrt'/g" package/base-files/files/bin/confi
 # 加入作者信息
 #sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='OpenWrt-X86-$(date +%Y%m%d)'/g" package/lean/default-settings/files/zzz-default-settings   
 sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='OpenWrt '/g" package/lean/default-settings/files/zzz-default-settings
-#sed -i "s/OPENWRT_RELEASE='*.*'/OPENWRT_RELEASE='OpenWrt R26.05.20'/g" package/lean/default-settings/files/zzz-default-settings
+sed -i "s/OPENWRT_RELEASE='*.*'/OPENWRT_RELEASE='OpenWrt '/g" package/lean/default-settings/files/zzz-default-settings
 #sed -i "s/DISTRIB_REVISION='*.*'/DISTRIB_REVISION='R26.05.20'/g" package/lean/default-settings/files/zzz-default-settings
 
 # 修改默认IP
