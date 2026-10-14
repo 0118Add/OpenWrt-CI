@@ -153,7 +153,7 @@ git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/
 #merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/xray-core
 #merge_package https://github.com/kiddin9/op-packages op-packages/luci-app-ssr-plus
 #merge_package https://github.com/fw876/helloworld helloworld/luci-app-ssr-plus
-merge_package https://github.com/fw876/helloworld helloworld/dns2tcp
+#merge_package https://github.com/fw876/helloworld helloworld/dns2tcp
 #merge_package https://github.com/fw876/helloworld helloworld/lua-neturl
 #merge_package https://github.com/fw876/helloworld helloworld/mosdns
 #merge_package https://github.com/fw876/helloworld helloworld/mihomo
