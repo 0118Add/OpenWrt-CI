@@ -147,7 +147,7 @@ ln -sf ../../../feeds/packages/net/msd_lite ./package/feeds/packages/msd_lite
 #merge_package https://github.com/0118Add/OP-Packages OP-Packages/luci-lib-fs
 #merge_package https://github.com/kiddin9/op-packages op-packages/luci-app-passwall
 #git clone -b main --single-branch https://github.com/Openwrt-Passwall/openwrt-passwall package/passwall
-#git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
+git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
 #merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/chinadns-ng
 #merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/geoview
 #merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/tcping
