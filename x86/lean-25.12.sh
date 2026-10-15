@@ -83,7 +83,7 @@ sed -i 's/KERNEL_PATCHVER:=.*/KERNEL_PATCHVER:=6.18/g' ./target/linux/x86/Makefi
 
 # 替换文件
 #wget -O ./package/kernel/linux/modules/netsupport.mk https://raw.githubusercontent.com/0118Add/X86-N1-Actions/main/general/netsupport.mk
-#wget -O ./package/lean/autocore/files/x86/index.htm https://raw.githubusercontent.com/0118Add/OpenWrt/main/images/index.htm
+#wget -O ./package/lean/default-settings/files/zzz-default-settings https://raw.githubusercontent.com/0118Add/OpenWrt-CI/main/x86/diy/x86_lede/zzz-default-settings
 
 # 修改 luci version.lua
 #sed -i '/luciversion/d' feeds/luci/modules/luci-lua-runtime/luasrc/version.lua
