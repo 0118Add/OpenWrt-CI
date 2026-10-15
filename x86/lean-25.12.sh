@@ -42,10 +42,22 @@ sed -i "s/hostname='.*'/hostname='OpenWrt'/g" package/base-files/files/bin/confi
 #sed -i -E 's|echo\s+"?\$vendor\s+\$product"?\s*>.*|echo "CUSTOM PRODUCT" > /tmp/sysinfo/model|' openwrt/target/linux/x86/base-files/lib/preinit/01_sysinfo
 
 # 加入作者信息
-#sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='OpenWrt-X86-$(date +%Y%m%d)'/g" package/lean/default-settings/files/zzz-default-settings   
-sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='OpenWrt '/g" package/lean/default-settings/files/zzz-default-settings
-sed -i "s/OPENWRT_RELEASE='*.*'/OPENWRT_RELEASE='OpenWrt R@BUILD_DATE@'/g" package/lean/default-settings/files/zzz-default-settings
-#sed -i "s/DISTRIB_REVISION='*.*'/DISTRIB_REVISION='R26.05.20'/g" package/lean/default-settings/files/zzz-default-settings
+#sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='OpenWrt '/g" package/lean/default-settings/files/zzz-default-settings
+#sed -i "s/OPENWRT_RELEASE='*.*'/OPENWRT_RELEASE='OpenWrt R@BUILD_DATE@'/g" package/lean/default-settings/files/zzz-default-settings
+
+# 修改 package/base-files/files/etc/openwrt_release
+if [ -f "package/base-files/files/etc/openwrt_release" ]; then
+    sed -i '/DISTRIB_REVISION/d' package/base-files/files/etc/openwrt_release
+    echo "DISTRIB_REVISION='R@BUILD_DATE@'" >> package/base-files/files/etc/openwrt_release
+    sed -i '/DISTRIB_DESCRIPTION/d' package/base-files/files/etc/openwrt_release
+    echo "DISTRIB_DESCRIPTION='OpenWrt '" >> package/base-files/files/etc/openwrt_release
+fi
+
+# 修改 package/base-files/files/usr/lib/os-release
+if [ -f "package/base-files/files/usr/lib/os-release" ]; then
+    sed -i -e 's/^BUILD_ID=.*/BUILD_ID=""/' -e '/OPENWRT_RELEASE/d' package/base-files/files/usr/lib/os-release
+    echo 'OPENWRT_RELEASE="OpenWrt R@BUILD_DATE@"' >> package/base-files/files/usr/lib/os-release
+fi
 
 # 修改默认IP
 sed -i 's/192.168.1.1/10.0.0.1/g' package/base-files/files/bin/config_generate
@@ -105,7 +117,7 @@ sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=165535' packag
 
 # 移除重复软件包
 #rm -rf package/helloworld/{hysteria,xray-core}
-rm -rf feeds/packages/net/{chinadns-ng,dns2tcp,dns2socks,msd_lite,lucky,geoview,tcping,v2ray-geodata,sing-box}
+rm -rf feeds/packages/net/{chinadns-ng,dns2tcp,dns2socks,msd_lite,lucky,geoview,tcping,v2ray-geodata,sing-box,xray-core}
 rm -rf feeds/luci/applications/luci-app-openclash
 rm -rf feeds/luci/applications/luci-app-dockerman
 rm -rf feeds/luci/applications/luci-app-lucky
@@ -151,9 +163,10 @@ ln -sf ../../../feeds/packages/net/msd_lite ./package/feeds/packages/msd_lite
 #git clone -b main --single-branch https://github.com/Openwrt-Passwall/openwrt-passwall package/passwall
 #git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
 merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/chinadns-ng
-merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/v2ray-geodata
-merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/tcping
 merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/geoview
+merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/tcping
+merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/v2ray-geodata
+merge_package https://github.com/Openwrt-Passwall/openwrt-passwall-packages openwrt-passwall-packages/xray-core
 #merge_package https://github.com/kiddin9/op-packages op-packages/luci-app-ssr-plus
 #merge_package https://github.com/fw876/helloworld helloworld/luci-app-ssr-plus
 merge_package https://github.com/fw876/helloworld helloworld/dns2tcp
