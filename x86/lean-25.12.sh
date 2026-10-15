@@ -42,8 +42,8 @@ sed -i "s/hostname='.*'/hostname='OpenWrt'/g" package/base-files/files/bin/confi
 
 # 加入作者信息
 #sed -i "s|DISTRIB_DESCRIPTION='.*'|DISTRIB_DESCRIPTION='OpenWrt %V %C'|g" package/base-files/files/etc/openwrt_release
-sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='OpenWrt '/g" package/lean/default-settings/files/zzz-default-settings
-sed -i "s/OPENWRT_RELEASE='*.*'/OPENWRT_RELEASE='OpenWrt R@BUILD_DATE@'/g" package/lean/default-settings/files/zzz-default-settings
+#sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='OpenWrt '/g" package/lean/default-settings/files/zzz-default-settings
+#sed -i "s/OPENWRT_RELEASE='*.*'/OPENWRT_RELEASE='OpenWrt R@BUILD_DATE@'/g" package/lean/default-settings/files/zzz-default-settings
 
 # 修改默认IP
 sed -i 's/192.168.1.1/10.0.0.1/g' package/base-files/files/bin/config_generate
@@ -69,7 +69,7 @@ sed -i 's/KERNEL_PATCHVER:=.*/KERNEL_PATCHVER:=6.18/g' ./target/linux/x86/Makefi
 
 # 替换文件
 #wget -O ./package/kernel/linux/modules/netsupport.mk https://raw.githubusercontent.com/0118Add/X86-N1-Actions/main/general/netsupport.mk
-#wget -O ./package/lean/default-settings/files/zzz-default-settings https://raw.githubusercontent.com/0118Add/OpenWrt-CI/main/x86/diy/x86_lede/zzz-default-settings
+wget -O ./package/lean/default-settings/files/zzz-default-settings https://raw.githubusercontent.com/0118Add/OpenWrt-CI/main/x86/diy/x86_lede/zzz-default-settings
 
 # 修改 luci version.lua
 #sed -i '/luciversion/d' feeds/luci/modules/luci-lua-runtime/luasrc/version.lua
