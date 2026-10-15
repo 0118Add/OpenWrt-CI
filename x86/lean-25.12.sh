@@ -36,28 +36,14 @@ gitea="git.cooluc.com"
 
 # 修改主机名字（不能纯数字或者使用中文）
 sed -i "s/hostname='.*'/hostname='OpenWrt'/g" package/base-files/files/bin/config_generate
-#sed -i "s/OpenWrt /OPWRT/g" package/lean/default-settings/files/zzz-default-settings
 
 # 将CUSTOM PRODUCT改为自己想要的型号
 #sed -i -E 's|echo\s+"?\$vendor\s+\$product"?\s*>.*|echo "CUSTOM PRODUCT" > /tmp/sysinfo/model|' openwrt/target/linux/x86/base-files/lib/preinit/01_sysinfo
 
 # 加入作者信息
-#sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='OpenWrt '/g" package/lean/default-settings/files/zzz-default-settings
-#sed -i "s/OPENWRT_RELEASE='*.*'/OPENWRT_RELEASE='OpenWrt R@BUILD_DATE@'/g" package/lean/default-settings/files/zzz-default-settings
-
-# 修改 package/base-files/files/etc/openwrt_release
-if [ -f "package/base-files/files/etc/openwrt_release" ]; then
-    sed -i '/DISTRIB_REVISION/d' package/base-files/files/etc/openwrt_release
-    echo "DISTRIB_REVISION='R@BUILD_DATE@'" >> package/base-files/files/etc/openwrt_release
-    sed -i '/DISTRIB_DESCRIPTION/d' package/base-files/files/etc/openwrt_release
-    echo "DISTRIB_DESCRIPTION='OpenWrt '" >> package/base-files/files/etc/openwrt_release
-fi
-
-# 修改 package/base-files/files/usr/lib/os-release
-if [ -f "package/base-files/files/usr/lib/os-release" ]; then
-    sed -i -e 's/^BUILD_ID=.*/BUILD_ID=""/' -e '/OPENWRT_RELEASE/d' package/base-files/files/usr/lib/os-release
-    echo 'OPENWRT_RELEASE="OpenWrt R@BUILD_DATE@"' >> package/base-files/files/usr/lib/os-release
-fi
+#sed -i "s|DISTRIB_DESCRIPTION='.*'|DISTRIB_DESCRIPTION='OpenWrt %V %C'|g" package/base-files/files/etc/openwrt_release
+sed -i "s/DISTRIB_DESCRIPTION='*.*'/DISTRIB_DESCRIPTION='OpenWrt '/g" package/lean/default-settings/files/zzz-default-settings
+sed -i "s/OPENWRT_RELEASE='*.*'/OPENWRT_RELEASE='OpenWrt R@BUILD_DATE@'/g" package/lean/default-settings/files/zzz-default-settings
 
 # 修改默认IP
 sed -i 's/192.168.1.1/10.0.0.1/g' package/base-files/files/bin/config_generate
