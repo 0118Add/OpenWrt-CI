@@ -123,8 +123,8 @@ rm -rf feeds/luci/applications/luci-app-zerotier
 #git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/lang/golang
 
 # 预编译 node
-#rm -rf feeds/packages/lang/node
-#git clone --depth=1 -b packages-24.10 https://github.com/sbwml/feeds_packages_lang_node-prebuilt feeds/packages/lang/node
+rm -rf feeds/packages/lang/node
+git clone --depth=1 -b packages-24.10 https://github.com/sbwml/feeds_packages_lang_node-prebuilt feeds/packages/lang/node
 
 git clone --depth=1 -b openwrt-25.12 https://github.com/immortalwrt/luci immortalwrt-luci
 #cp -rf immortalwrt-luci/applications/luci-app-dockerman feeds/luci/applications/luci-app-dockerman
