@@ -225,7 +225,7 @@ sed -i 's/解除网易云音乐播放限制/音乐解锁/g' feeds/luci/applicati
 #sed -i 's/firstchild(), "VPN"/firstchild(), "GFW"/g' feeds/luci/applications/luci-app-softethervpn/luasrc/controller/softethervpn.lua
 #sed -i 's/IPSec VPN 服务器/IPSec VPN/g' feeds/luci/applications/luci-app-ipsec-vpnd/po/zh-cn/ipsec.po
 #sed -i 's/WireGuard 状态/WiGd状态/g' feeds/luci/applications/luci-app-wireguard/po/zh-cn/wireguard.po
-sed -i 's/TurboACC/网络加速/g' feeds/luci/applications/luci-app-turboacc/root/usr/share/luci/menu.d/luci-app-turboacc.json
+#sed -i 's/TurboACC/网络加速/g' feeds/luci/applications/luci-app-turboacc/root/usr/share/luci/menu.d/luci-app-turboacc.json
 #sed -i 's/vpn/services/g' feeds/luci/applications/luci-app-zerotier/root/usr/share/luci/menu.d/luci-app-zerotier.json
 
 # 固定shadowsocks-rust版本以免编译失败
