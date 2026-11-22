@@ -122,7 +122,7 @@ git clone --depth=1 -b packages-25.12 https://github.com/sbwml/feeds_packages_la
 #git clone -b main --single-branch https://github.com/xiaorouji/openwrt-passwall package/passwall-luci
 #git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/openwrt-passwall
 git_sparse_clone main https://github.com/Openwrt-Passwall/openwrt-passwall-packages v2ray-geodata sing-box xray-core
-git_sparse_clone v5 https://github.com/sbwml/openwrt_helloworld luci-app-homeproxy
+#git_sparse_clone v5 https://github.com/sbwml/openwrt_helloworld luci-app-homeproxy
 #git clone https://github.com/sbwml/openwrt_helloworld package/openwrt_helloworld
 #git clone https://github.com/xiaorouji/openwrt-passwall2 package/passwall2
 #git clone https://github.com/sbwml/luci-app-alist.git package/alist
@@ -153,6 +153,7 @@ git clone https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 #git clone https://github.com/kenzok8/openwrt-clashoo package/clashoo
 
 # homeproxy
+git clone --depth 1 -b dev https://github.com/immortalwrt/homeproxy package/luci-app-homeproxy
 #git clone --depth 1 -b master https://github.com/fun200/homeproxy_plus package/luci-app-homeproxy
 #git_sparse_clone main https://github.com/VIKINGYFY/packages sing-box luci-app-homeproxy
 sed -i "s/ImmortalWrt/OpenWrt/g" package/luci-app-homeproxy/po/zh_Hans/homeproxy.po
@@ -164,7 +165,7 @@ sed -i "s/ImmortalWrt proxy/OpenWrt proxy/g" package/luci-app-homeproxy/htdocs/l
 
 # dae daed
 #git clone https://github.com/kenzok8/openwrt-daede package/daede
-git clone -b kix --depth 1 https://github.com/QiuSimons/luci-app-dae package/dae
+#git clone -b kix --depth 1 https://github.com/QiuSimons/luci-app-dae package/dae
 #git clone -b kix --depth 1 https://github.com/QiuSimons/luci-app-daed package/daed
 git clone https://github.com/QiuSimons/vmlinux-btf package/vmlinux-btf
 #sed -i 's/PKG_VERSION:=.*/PKG_VERSION:=2026.06.14/g' package/daed/daed/Makefile
@@ -331,6 +332,55 @@ curl -fsSL https://raw.githubusercontent.com/0118Add/X86_64-Test/main/general/re
 
 rm -rf feeds/packages/admin/zabbix
 rm -rf feeds/packages/net/onionshare-cli
+
+
+echo "🚀 拉取 luci-app-honk 并预放 x86_64 二进制核心"
+set -e
+
+# 1. 分段拼接防截断变量
+GH_HOST="https://github.com"
+LUCI_REPO_URL="${GH_HOST}/QiuSimons/luci-app-honk.git"
+CORE_RELEASES_URL="${GH_HOST}/daeuniverse/honk/releases"
+TARGET_ARCH="x86_64-unknown-linux-musl"
+
+HONK_REPO="package/luci-app-honk"
+HONK_DIR="${HONK_REPO}/honk"
+HONK_BIN="${HONK_DIR}/files/honk-core.bin"
+
+# 2. 克隆源码
+echo "🚀 正在克隆: ${LUCI_REPO_URL}"
+rm -rf "$HONK_REPO"
+git clone --depth=1 "$LUCI_REPO_URL" "$HONK_REPO"
+
+# 3. 直接从 Releases 网页自动获取最新版本号并拼接官方直链（免 API 限流）
+echo "🔍 正在自动获取 honk-core 最新版本号..."
+LATEST_TAG=$(curl -fsSL "$CORE_RELEASES_URL" | \
+    grep -oE '/daeuniverse/honk/releases/tag/v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?' | \
+    head -n1 | awk -F'/' '{print $NF}')
+
+[ -n "$LATEST_TAG" ] || { echo "❌ 错误：未能自动获取到最新版本号！"; exit 1; }
+echo "📌 自动获取到最新版本: ${LATEST_TAG}"
+
+DOWNLOAD_URL="${CORE_RELEASES_URL}/download/${LATEST_TAG}/honk-core-${LATEST_TAG}-${TARGET_ARCH}-full.tar.gz"
+echo "📥 最终下载地址: $DOWNLOAD_URL"
+
+# 5. 下载、解压并预放二进制文件
+curl -fsSL --retry 5 --retry-delay 2 -o /tmp/honk-core.tar.gz "$DOWNLOAD_URL"
+rm -rf /tmp/honkpkg && mkdir -p /tmp/honkpkg
+tar -xzf /tmp/honk-core.tar.gz -C /tmp/honkpkg
+
+CORE_FILE=$(find /tmp/honkpkg -type f -name "honk-core*" ! -name "*.tar.gz" -print -quit)
+[ -n "$CORE_FILE" ] || { echo "❌ 压缩包内未找到 honk-core 二进制文件！"; exit 1; }
+
+mkdir -p "${HONK_DIR}/files"
+cp -f "$CORE_FILE" "$HONK_BIN"
+chmod +x "$HONK_BIN"
+rm -rf /tmp/honk-core.tar.gz /tmp/honkpkg
+
+echo "✅ honk-core.bin 预放成功！文件大小: $(du -h "$HONK_BIN" | cut -f1)"
+
+# 6. 修正 Makefile 中可能存在的大写 SKIP 占位符
+find "$HONK_REPO" -type f -name "Makefile" -exec sed -i -E 's/^([[:space:]]*PKG_(HASH|MIRROR_HASH)[[:space:]]*:?=[[:space:]]*)SKIP[[:space:]]*$/\1skip/' {} +
 
 ./scripts/feeds update -i
 ./scripts/feeds install -a
