@@ -27,7 +27,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       actions: write
@@ -96,40 +96,45 @@ jobs:
 
     - name: 4. 环境部署
       run: |
-        # 清理 Ubuntu 24.04 残留的超大无用目录
-        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-        sudo docker image prune --all --force
-        
+        set -e
         export DEBIAN_FRONTEND=noninteractive
-        sudo apt-get remove -y needrestart || true
-        
-        sudo -E apt-get -qq update
-        DEPS=$(curl -fsSL https://raw.githubusercontent.com/0118Add/rule/main/depends_ubuntu || echo "")
+
+        echo "🛑 清理潜在 apt/dpkg 锁并禁用 man-db 自动建库..."
+        sudo systemctl stop unattended-upgrades apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
+        sudo killall -9 apt apt-get dpkg apt-cache 2>/dev/null || true
+        sudo rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock /var/lib/apt/lists/lock
+        sudo dpkg --configure -a || true
+        echo "man-db man-db/auto-update boolean false" | sudo debconf-set-selections
+
+        echo "🧹 清理 CodeQL 目录..."
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+        APT_OPTS="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold"
+
+        echo "🔄 更新软件源..."
+        timeout 300 sudo -E apt-get update $APT_OPTS || timeout 300 sudo -E apt-get update $APT_OPTS
+
+        echo "📥 获取编译依赖列表..."
+        DEPS=$(curl -fsSL --max-time 20 https://raw.githubusercontent.com/free-diy/openwrt/main/depends_ubuntu || echo "")
         if [ -z "$DEPS" ]; then
           DEPS="ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache clang cmake cpio curl device-tree-compiler dwarves ecj fastjar flex gawk gettext gcc-multilib g++-multilib git gnutls-dev golang-go gperf haveged help2man intltool lib32gcc-s1 libbpf-dev libc6-dev-i386 libclang-dev libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libpython3-dev libreadline-dev libssl-dev libtool libyaml-dev libz-dev lld llvm lrzsz mkisofs msmtp nano ninja-build npm p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd"
         fi
 
-        sudo -E apt-get -qq install -y --no-install-recommends \
-          -o Dpkg::Options::="--force-confdef" \
-          -o Dpkg::Options::="--force-confold" \
-          $DEPS
-          
-        sudo apt-get purge -y rustc cargo libstd-rust-* || true
-        sudo apt-get autoremove -y
-        sudo -E apt-get -qq autoremove --purge && sudo -E apt-get -qq clean
+        echo "📦 安装编译依赖..."
+        timeout 600 sudo -E apt-get install -y --no-install-recommends $APT_OPTS $DEPS
+
+        echo "🧽 清理 APT 缓存与设置时区..."
+        sudo -E apt-get -qq autoremove --purge -y $APT_OPTS && sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
-        sudo npm install -g pnpm
+
+        echo "📦 安装 pnpm..."
+        timeout 180 sudo npm install -g pnpm --fetch-retries=3 --fetch-retry-mintimeout=5000
+        echo "✅ 第 4 步环境部署完成"
+
 
     - name: 5. 克隆源码与环境准备
       run: |
-        echo "⏳ 正在克隆仓库: $REPO_URL (分支: $REPO_BRANCH)..."
-        
-        # 使用 timeout 命令限制 5 分钟内必须完成，防止无限死卡
-        timeout 300 git clone -b $REPO_BRANCH --single-branch --depth 1 $REPO_URL $OPENWRT_NAME || {
-          echo "❌ 错误: 源码克隆超时或失败！可能是 GitHub 访问外部仓库网络不通或被限速。"
-          exit 1
-        }
-        
+        git clone -b $REPO_BRANCH --single-branch --depth 1 $REPO_URL $OPENWRT_NAME
         echo "OPENWRT_PATH=${GITHUB_WORKSPACE}/${OPENWRT_NAME}" >> $GITHUB_ENV
         cd "$OPENWRT_NAME"
         echo "COMMIT_DATE=$(git show -s --date=short --format='%ci' | awk '{print $1}')" >> $GITHUB_ENV
@@ -215,66 +220,6 @@ jobs:
         echo "📊 dl 目录缓存体积前 5 排行:"
         (du -h dl/* 2>/dev/null | sort -rh | head -n 5) 2>/dev/null || echo "dl 目录为空"
         echo "=========================================="
-
-        # --- 整合 luci-app-honk 的宿主机编译环境依赖 ---
-        echo "🔧 正在搜索并配置 luci-app-honk 所需的宿主机工具链..."
-        
-        # 1. 安装 Rust 环境并直接设置为最新稳定版 (stable)
-        if ! command -v rustup &> /dev/null; then
-          # 使用 --default-toolchain stable 自动获取并安装最新稳定版
-          curl --retry 3 --retry-delay 2 --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal --no-modify-path
-        else
-          # 如果环境已存在 rustup，则更新并切换到 stable
-          rustup update stable
-          rustup default stable
-        fi
-        export PATH="$HOME/.cargo/bin:$PATH"
-        
-        # 验证当前的 Rust 版本，确保其满足构建要求
-        rustc --version
-
-        # 2. 限定在 package 和 feeds 目录下快速精准搜索 honk_toolchain.sh
-        HONK_TOOLCHAIN_PATH=""
-        for candidate in \
-          "package/luci-app-honk/honk/honk_toolchain.sh" \
-          "package/luci-app-honk/honk_toolchain.sh" \
-          "feeds/luci/applications/luci-app-honk/honk/honk_toolchain.sh" \
-          "feeds/luci/applications/luci-app-honk/honk_toolchain.sh"; do
-          if [ -f "$candidate" ]; then
-            HONK_TOOLCHAIN_PATH="$candidate"
-            break
-          fi
-        done
-        
-        # 如果预置路径未命中，仅在 package 目录下浅层查找，绝不进行全盘耗时扫描
-        if [ -z "$HONK_TOOLCHAIN_PATH" ] && [ -d "package" ]; then
-          HONK_TOOLCHAIN_PATH=$(find package -maxdepth 4 -type f -name "honk_toolchain.sh" | head -n 1)
-        fi
-        
-        # 3. 如果找到了脚本，则自动执行并安装依赖
-        if [ -n "$HONK_TOOLCHAIN_PATH" ] && [ -f "$HONK_TOOLCHAIN_PATH" ]; then
-          HONK_DIR=$(dirname "$HONK_TOOLCHAIN_PATH")
-          echo "✅ 成功找到 honk 工具链脚本: $HONK_TOOLCHAIN_PATH (所在目录: $HONK_DIR)"
-          
-          # 执行解析脚本获取版本号
-          eval "$(bash "$HONK_TOOLCHAIN_PATH")"
-          
-          # 安装 bpf-linker
-          echo "📦 正在安装 bpf-linker v${BPF_LINKER_VERSION}..."
-          curl --retry 3 --retry-delay 2 -fsSL -o /tmp/bpf-linker.tar.zst "https://github.com/aya-rs/bpf-linker/releases/download/v${BPF_LINKER_VERSION}/bpf-linker-x86_64-unknown-linux-musl.tar.zst"
-          echo "${BPF_LINKER_SHA256}  /tmp/bpf-linker.tar.zst" | sha256sum -c -
-          sudo tar --zstd -xf /tmp/bpf-linker.tar.zst -C /usr/local/bin
-          
-          # 安装 Zig 编译器
-          echo "📦 正在安装 Zig v${ZIG_VERSION}..."
-          curl --retry 3 --retry-delay 2 -fsSL -o /tmp/zig.tar.xz "https://ziglang.org/download/${ZIG_VERSION}/zig-x86_64-linux-${ZIG_VERSION}.tar.xz"
-          sudo tar -xJf /tmp/zig.tar.xz -C /usr/local
-          sudo ln -sf "/usr/local/zig-x86_64-linux-${ZIG_VERSION}/zig" /usr/local/bin/zig
-          echo "✅ honk 专用宿主机工具链安装完成！"
-        else
-          echo "⚠️ 指定目录未检测到 honk_toolchain.sh 脚本，跳过专用工具链安装。"
-        fi
-        # ---------------------------------------------
 
     - name: 9. 开始编译
       id: compile
